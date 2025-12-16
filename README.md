@@ -60,99 +60,6 @@ npx http-server
 # Luego abre http://localhost:8000 en tu navegador
 ```
 
-## Publicar en GitHub Pages
-
-Esta aplicación está lista para ser publicada en GitHub Pages de forma automática.
-
-### Pasos para publicar:
-
-1. **Crea un repositorio en GitHub:**
-   - Ve a GitHub.com e inicia sesión
-   - Crea un nuevo repositorio (público)
-   - Dale un nombre, por ejemplo: `qr-generator`
-   - **NO inicialices** con README, .gitignore ni licencia
-
-2. **Sube tu código al repositorio:**
-
-```bash
-# Inicializa el repositorio Git (si aún no lo has hecho)
-git init
-
-# Agrega todos los archivos
-git add .
-
-# Crea el primer commit
-git commit -m "Initial commit: QR Generator con logo"
-
-# Agrega el remote de GitHub (reemplaza con tu URL)
-git remote add origin https://github.com/tu-usuario/qr-generator.git
-
-# Sube el código a la rama principal
-git push -u origin main
-```
-
-**Nota:** Si tu rama principal se llama `master` en lugar de `main`, usa:
-```bash
-git push -u origin master
-```
-
-3. **Activa GitHub Pages:**
-   - Ve a tu repositorio en GitHub
-   - Haz clic en **Settings** (Configuración)
-   - En el menú lateral, haz clic en **Pages**
-   - En **Source**, selecciona **GitHub Actions**
-   - El workflow ya está configurado y se ejecutará automáticamente
-
-4. **Accede a tu sitio:**
-
-Tu aplicación estará disponible en:
-```
-https://tu-usuario.github.io/qr-generator/
-```
-
-### Verificar el despliegue:
-
-1. Ve a tu repositorio en GitHub
-2. Haz clic en la pestaña **Actions**
-3. Verás el workflow "Deploy to GitHub Pages" ejecutándose o completado
-4. Una vez completado con éxito (check verde ✓), tu sitio estará disponible
-5. Puedes ver la URL en **Settings > Pages**
-
-### Actualizar el sitio:
-
-Cada vez que hagas un commit a la rama `main` o `master`, GitHub Pages se actualizará automáticamente:
-
-```bash
-# Realiza cambios en tu código
-git add .
-git commit -m "Descripción de los cambios"
-git push
-```
-
-El workflow se ejecutará automáticamente y tu sitio se actualizará en 1-2 minutos.
-
-### Solución de problemas:
-
-**El workflow falla:**
-- Ve a **Actions** y revisa los logs del workflow fallido
-- Verifica que el archivo `.github/workflows/deploy.yml` esté presente
-- Asegúrate de haber activado GitHub Pages desde **Settings > Pages**
-
-**La página muestra 404:**
-- Espera 2-5 minutos después del primer despliegue
-- Verifica que el repositorio sea público
-- Comprueba que GitHub Pages esté activado en **Settings > Pages > Source: GitHub Actions**
-
-**Cambios no se reflejan:**
-- Verifica que el workflow se haya ejecutado correctamente en **Actions**
-- Limpia la caché del navegador (Ctrl+F5 o Cmd+Shift+R)
-- Los despliegues pueden tardar 1-2 minutos en propagarse
-
-**Error de permisos:**
-- Ve a **Settings > Actions > General**
-- En "Workflow permissions", selecciona **Read and write permissions**
-- Marca la casilla "Allow GitHub Actions to create and approve pull requests"
-
 ## Cómo usar la aplicación
 
 ### 1. Generar un código QR básico
@@ -262,6 +169,99 @@ El logo se integra de forma inteligente:
 - Verifica que todos los archivos estén en la misma carpeta
 - Abre la consola del navegador (F12) para ver posibles errores
 - Asegúrate de estar usando un navegador moderno
+
+## Publicar en GitHub Pages
+
+Esta aplicación está lista para ser publicada en GitHub Pages de forma automática.
+
+### Pasos para publicar:
+
+1. **Crea un repositorio en GitHub:**
+   - Ve a GitHub.com e inicia sesión
+   - Crea un nuevo repositorio (público)
+   - Dale un nombre, por ejemplo: `qr-generator`
+   - **NO inicialices** con README, .gitignore ni licencia
+
+2. **Sube tu código al repositorio:**
+
+```bash
+# Inicializa el repositorio Git (si aún no lo has hecho)
+git init
+
+# Agrega todos los archivos
+git add .
+
+# Crea el primer commit
+git commit -m "Initial commit: QR Generator con logo"
+
+# Agrega el remote de GitHub (reemplaza con tu URL)
+git remote add origin https://github.com/tu-usuario/qr-generator.git
+
+# Sube el código a la rama principal
+git push -u origin main
+```
+
+**Nota:** Si tu rama principal se llama `master` en lugar de `main`, usa:
+```bash
+git push -u origin master
+```
+
+3. **Activa GitHub Pages:**
+   - Ve a tu repositorio en GitHub
+   - Haz clic en **Settings** (Configuración)
+   - En el menú lateral, haz clic en **Pages**
+   - En **Source**, selecciona **GitHub Actions**
+   - El workflow ya está configurado y se ejecutará automáticamente
+
+4. **Accede a tu sitio:**
+
+Tu aplicación estará disponible en:
+```
+https://tu-usuario.github.io/qr-generator/
+```
+
+### Verificar el despliegue:
+
+1. Ve a tu repositorio en GitHub
+2. Haz clic en la pestaña **Actions**
+3. Verás el workflow "Deploy to GitHub Pages" ejecutándose o completado
+4. Una vez completado con éxito (check verde ✓), tu sitio estará disponible
+5. Puedes ver la URL en **Settings > Pages**
+
+### Actualizar el sitio:
+
+Cada vez que hagas un commit a la rama `main` o `master`, GitHub Pages se actualizará automáticamente:
+
+```bash
+# Realiza cambios en tu código
+git add .
+git commit -m "Descripción de los cambios"
+git push
+```
+
+El workflow se ejecutará automáticamente y tu sitio se actualizará en 1-2 minutos.
+
+### Solución de problemas:
+
+**El workflow falla:**
+- Ve a **Actions** y revisa los logs del workflow fallido
+- Verifica que el archivo `.github/workflows/deploy.yml` esté presente
+- Asegúrate de haber activado GitHub Pages desde **Settings > Pages**
+
+**La página muestra 404:**
+- Espera 2-5 minutos después del primer despliegue
+- Verifica que el repositorio sea público
+- Comprueba que GitHub Pages esté activado en **Settings > Pages > Source: GitHub Actions**
+
+**Cambios no se reflejan:**
+- Verifica que el workflow se haya ejecutado correctamente en **Actions**
+- Limpia la caché del navegador (Ctrl+F5 o Cmd+Shift+R)
+- Los despliegues pueden tardar 1-2 minutos en propagarse
+
+**Error de permisos:**
+- Ve a **Settings > Actions > General**
+- En "Workflow permissions", selecciona **Read and write permissions**
+- Marca la casilla "Allow GitHub Actions to create and approve pull requests"
 
 ## Contribuciones
 
