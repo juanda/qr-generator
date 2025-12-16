@@ -206,6 +206,21 @@ function generateQRCode() {
     }
 }
 
+// Función auxiliar para dibujar un rectángulo con esquinas redondeadas
+function roundRect(ctx, x, y, width, height, radius) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+}
+
 // Agrega el logo al centro del QR
 function addLogoToQR(qrCanvas, logoImg, showBorder = true) {
     const ctx = qrCanvas.getContext('2d');
@@ -235,25 +250,29 @@ function addLogoToQR(qrCanvas, logoImg, showBorder = true) {
     const x = (qrSize - logoWidth) / 2;
     const y = (qrSize - logoHeight) / 2;
 
-    // Dibuja un fondo blanco detrás del logo para mejor contraste
     const padding = 10;
-    ctx.fillStyle = 'white';
-    ctx.fillRect(
-        x - padding,
-        y - padding,
-        logoWidth + (padding * 2),
-        logoHeight + (padding * 2)
-    );
+    const borderRadius = 8;
 
-    // Dibuja el logo con su relación de aspecto original
+    // Dibuja el fondo blanco con esquinas redondeadas
+    ctx.fillStyle = 'white';
+    roundRect(ctx, x - padding, y - padding, logoWidth + padding * 2, logoHeight + padding * 2, borderRadius);
+    ctx.fill();
+
+    // Dibuja el logo con esquinas redondeadas usando clipping
+    ctx.save();
+    const logoRadius = 6;
+    roundRect(ctx, x, y, logoWidth, logoHeight, logoRadius);
+    ctx.clip();
     ctx.drawImage(logoImg, x, y, logoWidth, logoHeight);
+    ctx.restore();
 
     // Dibuja borde interactivo solo para la vista previa
     if (logoImg && showBorder) {
         ctx.strokeStyle = 'rgba(102, 126, 234, 0.5)';
         ctx.lineWidth = 2;
         ctx.setLineDash([5, 5]);
-        ctx.strokeRect(x - padding, y - padding, logoWidth + padding * 2, logoHeight + padding * 2);
+        roundRect(ctx, x - padding, y - padding, logoWidth + padding * 2, logoHeight + padding * 2, borderRadius);
+        ctx.stroke();
         ctx.setLineDash([]);
     }
 }
