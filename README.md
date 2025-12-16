@@ -60,16 +60,17 @@ npx http-server
 # Luego abre http://localhost:8000 en tu navegador
 ```
 
-## Publicar en GitLab Pages
+## Publicar en GitHub Pages
 
-Esta aplicación está lista para ser publicada en GitLab Pages de forma automática.
+Esta aplicación está lista para ser publicada en GitHub Pages de forma automática.
 
 ### Pasos para publicar:
 
-1. **Crea un repositorio en GitLab:**
-   - Ve a GitLab.com e inicia sesión
-   - Crea un nuevo proyecto (público o privado)
+1. **Crea un repositorio en GitHub:**
+   - Ve a GitHub.com e inicia sesión
+   - Crea un nuevo repositorio (público)
    - Dale un nombre, por ejemplo: `qr-generator`
+   - **NO inicialices** con README, .gitignore ni licencia
 
 2. **Sube tu código al repositorio:**
 
@@ -83,8 +84,8 @@ git add .
 # Crea el primer commit
 git commit -m "Initial commit: QR Generator con logo"
 
-# Agrega el remote de GitLab (reemplaza con tu URL)
-git remote add origin https://gitlab.com/tu-usuario/qr-generator.git
+# Agrega el remote de GitHub (reemplaza con tu URL)
+git remote add origin https://github.com/tu-usuario/qr-generator.git
 
 # Sube el código a la rama principal
 git push -u origin main
@@ -95,28 +96,31 @@ git push -u origin main
 git push -u origin master
 ```
 
-3. **GitLab Pages se activará automáticamente:**
-   - El archivo `.gitlab-ci.yml` ya está configurado
-   - GitLab ejecutará el pipeline automáticamente
-   - En unos minutos, tu sitio estará disponible
+3. **Activa GitHub Pages:**
+   - Ve a tu repositorio en GitHub
+   - Haz clic en **Settings** (Configuración)
+   - En el menú lateral, haz clic en **Pages**
+   - En **Source**, selecciona **GitHub Actions**
+   - El workflow ya está configurado y se ejecutará automáticamente
 
 4. **Accede a tu sitio:**
 
 Tu aplicación estará disponible en:
 ```
-https://tu-usuario.gitlab.io/qr-generator/
+https://tu-usuario.github.io/qr-generator/
 ```
 
 ### Verificar el despliegue:
 
-1. Ve a tu proyecto en GitLab
-2. En el menú lateral, haz clic en **CI/CD > Pipelines**
-3. Verás el pipeline ejecutándose o completado
-4. Haz clic en **Settings > Pages** para ver la URL de tu sitio
+1. Ve a tu repositorio en GitHub
+2. Haz clic en la pestaña **Actions**
+3. Verás el workflow "Deploy to GitHub Pages" ejecutándose o completado
+4. Una vez completado con éxito (check verde ✓), tu sitio estará disponible
+5. Puedes ver la URL en **Settings > Pages**
 
 ### Actualizar el sitio:
 
-Cada vez que hagas un commit a la rama `main` o `master`, GitLab Pages se actualizará automáticamente:
+Cada vez que hagas un commit a la rama `main` o `master`, GitHub Pages se actualizará automáticamente:
 
 ```bash
 # Realiza cambios en tu código
@@ -125,20 +129,29 @@ git commit -m "Descripción de los cambios"
 git push
 ```
 
+El workflow se ejecutará automáticamente y tu sitio se actualizará en 1-2 minutos.
+
 ### Solución de problemas:
 
-**El pipeline falla:**
-- Verifica que el archivo `.gitlab-ci.yml` esté en la raíz del proyecto
-- Revisa los logs del pipeline en **CI/CD > Pipelines**
+**El workflow falla:**
+- Ve a **Actions** y revisa los logs del workflow fallido
+- Verifica que el archivo `.github/workflows/deploy.yml` esté presente
+- Asegúrate de haber activado GitHub Pages desde **Settings > Pages**
 
-**La página no se carga:**
+**La página muestra 404:**
 - Espera 2-5 minutos después del primer despliegue
-- Verifica la URL en **Settings > Pages**
-- Asegúrate de que el proyecto sea público o tengas permisos
+- Verifica que el repositorio sea público
+- Comprueba que GitHub Pages esté activado en **Settings > Pages > Source: GitHub Actions**
 
 **Cambios no se reflejan:**
+- Verifica que el workflow se haya ejecutado correctamente en **Actions**
 - Limpia la caché del navegador (Ctrl+F5 o Cmd+Shift+R)
-- Verifica que el pipeline se haya ejecutado correctamente
+- Los despliegues pueden tardar 1-2 minutos en propagarse
+
+**Error de permisos:**
+- Ve a **Settings > Actions > General**
+- En "Workflow permissions", selecciona **Read and write permissions**
+- Marca la casilla "Allow GitHub Actions to create and approve pull requests"
 
 ## Cómo usar la aplicación
 
@@ -174,8 +187,10 @@ Haz clic en el botón "Descargar QR" para guardar tu código QR como imagen PNG.
 
 ```
 qr-generator/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml      # Workflow de GitHub Actions
 ├── .gitignore              # Archivos ignorados por Git
-├── .gitlab-ci.yml          # Configuración de GitLab Pages
 ├── index.html              # Interfaz de usuario
 ├── style.css               # Estilos de la aplicación
 ├── app.js                  # Lógica principal

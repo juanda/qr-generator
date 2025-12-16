@@ -24,8 +24,9 @@ yarn-error.log
 package-lock.json
 yarn.lock
 
-# GitLab CI/CD
-public/
+# GitHub Pages / Build
+_site/
+.jekyll-cache/
 
 # Archivos de prueba locales
 test/
