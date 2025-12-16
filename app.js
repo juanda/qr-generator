@@ -138,13 +138,29 @@ function addLogoToQR(qrCanvas, logoImg) {
     const ctx = qrCanvas.getContext('2d');
     const qrSize = qrCanvas.width;
 
-    // Calcula el tamaño del logo basado en el porcentaje seleccionado
+    // Calcula el tamaño máximo del logo basado en el porcentaje seleccionado
     const logoSizePercent = parseInt(logoSizeInput.value) / 100;
-    const logoSize = qrSize * logoSizePercent;
+    const maxLogoSize = qrSize * logoSizePercent;
+
+    // Calcula la relación de aspecto de la imagen original
+    const aspectRatio = logoImg.width / logoImg.height;
+
+    // Calcula las dimensiones del logo manteniendo la relación de aspecto
+    let logoWidth, logoHeight;
+
+    if (aspectRatio > 1) {
+        // La imagen es más ancha que alta
+        logoWidth = maxLogoSize;
+        logoHeight = maxLogoSize / aspectRatio;
+    } else {
+        // La imagen es más alta que ancha (o cuadrada)
+        logoHeight = maxLogoSize;
+        logoWidth = maxLogoSize * aspectRatio;
+    }
 
     // Calcula la posición central
-    const x = (qrSize - logoSize) / 2;
-    const y = (qrSize - logoSize) / 2;
+    const x = (qrSize - logoWidth) / 2;
+    const y = (qrSize - logoHeight) / 2;
 
     // Dibuja un fondo blanco detrás del logo para mejor contraste
     const padding = 10;
@@ -152,12 +168,12 @@ function addLogoToQR(qrCanvas, logoImg) {
     ctx.fillRect(
         x - padding,
         y - padding,
-        logoSize + (padding * 2),
-        logoSize + (padding * 2)
+        logoWidth + (padding * 2),
+        logoHeight + (padding * 2)
     );
 
-    // Dibuja el logo
-    ctx.drawImage(logoImg, x, y, logoSize, logoSize);
+    // Dibuja el logo con su relación de aspecto original
+    ctx.drawImage(logoImg, x, y, logoWidth, logoHeight);
 }
 
 // Descarga el código QR generado
