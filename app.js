@@ -107,19 +107,85 @@ function getLogoDimensions(canvasSize) {
     };
 }
 
-// Verifica si un módulo del QR está dentro del área del logo
+// Verifica si un punto está dentro de un rectángulo redondeado
+function isPointInRoundedRect(px, py, rectX, rectY, rectWidth, rectHeight, radius) {
+    // Si el punto está fuera del rectángulo general, no está dentro
+    if (px < rectX || px > rectX + rectWidth || py < rectY || py > rectY + rectHeight) {
+        return false;
+    }
+
+    // Define las áreas de las esquinas
+    const inTopLeftCorner = px < rectX + radius && py < rectY + radius;
+    const inTopRightCorner = px > rectX + rectWidth - radius && py < rectY + radius;
+    const inBottomLeftCorner = px < rectX + radius && py > rectY + rectHeight - radius;
+    const inBottomRightCorner = px > rectX + rectWidth - radius && py > rectY + rectHeight - radius;
+
+    // Si no está en ninguna esquina, está dentro del rectángulo
+    if (!inTopLeftCorner && !inTopRightCorner && !inBottomLeftCorner && !inBottomRightCorner) {
+        return true;
+    }
+
+    // Verifica cada esquina usando distancia al centro del círculo
+    if (inTopLeftCorner) {
+        const dx = px - (rectX + radius);
+        const dy = py - (rectY + radius);
+        return dx * dx + dy * dy <= radius * radius;
+    }
+    if (inTopRightCorner) {
+        const dx = px - (rectX + rectWidth - radius);
+        const dy = py - (rectY + radius);
+        return dx * dx + dy * dy <= radius * radius;
+    }
+    if (inBottomLeftCorner) {
+        const dx = px - (rectX + radius);
+        const dy = py - (rectY + rectHeight - radius);
+        return dx * dx + dy * dy <= radius * radius;
+    }
+    if (inBottomRightCorner) {
+        const dx = px - (rectX + rectWidth - radius);
+        const dy = py - (rectY + rectHeight - radius);
+        return dx * dx + dy * dy <= radius * radius;
+    }
+
+    return false;
+}
+
+// Verifica si un módulo del QR está dentro del área del logo con esquinas redondeadas
 function isModuleInLogoArea(moduleX, moduleY, moduleSize, logoDims) {
     if (!logoDims) return false;
 
-    const moduleRight = moduleX + moduleSize;
-    const moduleBottom = moduleY + moduleSize;
-    const logoRight = logoDims.x + logoDims.width;
-    const logoBottom = logoDims.y + logoDims.height;
+    const borderRadius = 8; // Mismo radio que se usa en addLogoToQR
 
-    return !(moduleRight <= logoDims.x ||
-             moduleX >= logoRight ||
-             moduleBottom <= logoDims.y ||
-             moduleY >= logoBottom);
+    // Verifica las cuatro esquinas del módulo
+    const corners = [
+        { x: moduleX, y: moduleY }, // Superior izquierda
+        { x: moduleX + moduleSize, y: moduleY }, // Superior derecha
+        { x: moduleX, y: moduleY + moduleSize }, // Inferior izquierda
+        { x: moduleX + moduleSize, y: moduleY + moduleSize } // Inferior derecha
+    ];
+
+    // Si alguna esquina está dentro del rectángulo redondeado, el módulo intersecta
+    for (const corner of corners) {
+        if (isPointInRoundedRect(
+            corner.x, corner.y,
+            logoDims.x, logoDims.y,
+            logoDims.width, logoDims.height,
+            borderRadius
+        )) {
+            return true;
+        }
+    }
+
+    // Verifica el centro del módulo también
+    const centerX = moduleX + moduleSize / 2;
+    const centerY = moduleY + moduleSize / 2;
+
+    return isPointInRoundedRect(
+        centerX, centerY,
+        logoDims.x, logoDims.y,
+        logoDims.width, logoDims.height,
+        borderRadius
+    );
 }
 
 // Genera el código QR
