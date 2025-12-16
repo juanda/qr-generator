@@ -60,6 +60,86 @@ npx http-server
 # Luego abre http://localhost:8000 en tu navegador
 ```
 
+## Publicar en GitLab Pages
+
+Esta aplicación está lista para ser publicada en GitLab Pages de forma automática.
+
+### Pasos para publicar:
+
+1. **Crea un repositorio en GitLab:**
+   - Ve a GitLab.com e inicia sesión
+   - Crea un nuevo proyecto (público o privado)
+   - Dale un nombre, por ejemplo: `qr-generator`
+
+2. **Sube tu código al repositorio:**
+
+```bash
+# Inicializa el repositorio Git (si aún no lo has hecho)
+git init
+
+# Agrega todos los archivos
+git add .
+
+# Crea el primer commit
+git commit -m "Initial commit: QR Generator con logo"
+
+# Agrega el remote de GitLab (reemplaza con tu URL)
+git remote add origin https://gitlab.com/tu-usuario/qr-generator.git
+
+# Sube el código a la rama principal
+git push -u origin main
+```
+
+**Nota:** Si tu rama principal se llama `master` en lugar de `main`, usa:
+```bash
+git push -u origin master
+```
+
+3. **GitLab Pages se activará automáticamente:**
+   - El archivo `.gitlab-ci.yml` ya está configurado
+   - GitLab ejecutará el pipeline automáticamente
+   - En unos minutos, tu sitio estará disponible
+
+4. **Accede a tu sitio:**
+
+Tu aplicación estará disponible en:
+```
+https://tu-usuario.gitlab.io/qr-generator/
+```
+
+### Verificar el despliegue:
+
+1. Ve a tu proyecto en GitLab
+2. En el menú lateral, haz clic en **CI/CD > Pipelines**
+3. Verás el pipeline ejecutándose o completado
+4. Haz clic en **Settings > Pages** para ver la URL de tu sitio
+
+### Actualizar el sitio:
+
+Cada vez que hagas un commit a la rama `main` o `master`, GitLab Pages se actualizará automáticamente:
+
+```bash
+# Realiza cambios en tu código
+git add .
+git commit -m "Descripción de los cambios"
+git push
+```
+
+### Solución de problemas:
+
+**El pipeline falla:**
+- Verifica que el archivo `.gitlab-ci.yml` esté en la raíz del proyecto
+- Revisa los logs del pipeline en **CI/CD > Pipelines**
+
+**La página no se carga:**
+- Espera 2-5 minutos después del primer despliegue
+- Verifica la URL en **Settings > Pages**
+- Asegúrate de que el proyecto sea público o tengas permisos
+
+**Cambios no se reflejan:**
+- Limpia la caché del navegador (Ctrl+F5 o Cmd+Shift+R)
+- Verifica que el pipeline se haya ejecutado correctamente
+
 ## Cómo usar la aplicación
 
 ### 1. Generar un código QR básico
@@ -94,6 +174,8 @@ Haz clic en el botón "Descargar QR" para guardar tu código QR como imagen PNG.
 
 ```
 qr-generator/
+├── .gitignore              # Archivos ignorados por Git
+├── .gitlab-ci.yml          # Configuración de GitLab Pages
 ├── index.html              # Interfaz de usuario
 ├── style.css               # Estilos de la aplicación
 ├── app.js                  # Lógica principal

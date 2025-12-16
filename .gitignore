@@ -1,0 +1,33 @@
+# Sistema Operativo
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editores e IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# Archivos temporales
+*.tmp
+*.bak
+*.log
+
+# Node.js (si decides agregar herramientas de build en el futuro)
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# GitLab CI/CD
+public/
+
+# Archivos de prueba locales
+test/
+tests/
+*.test.html
