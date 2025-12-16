@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Código QR con Logo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Generador de Código QR</h1>
+        <p class="subtitle">Crea códigos QR personalizados con tu logo</p>
+
+        <div class="form-container">
+            <div class="input-group">
+                <label for="qr-text">Texto o URL para el código QR:</label>
+                <input type="text" id="qr-text" placeholder="https://ejemplo.com o cualquier texto" />
+            </div>
+
+            <div class="input-group">
+                <label for="logo-upload">Subir logo (PNG):</label>
+                <div class="file-upload-wrapper">
+                    <input type="file" id="logo-upload" accept="image/png" />
+                    <span class="file-name">Ningún archivo seleccionado</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="logo-size">Tamaño del logo (%):</label>
+                <input type="range" id="logo-size" min="10" max="30" value="20" />
+                <span class="size-value">20%</span>
+            </div>
+
+            <div class="input-group">
+                <label for="qr-size">Tamaño del código QR:</label>
+                <select id="qr-size">
+                    <option value="200">Pequeño (200x200)</option>
+                    <option value="300" selected>Mediano (300x300)</option>
+                    <option value="400">Grande (400x400)</option>
+                    <option value="500">Extra Grande (500x500)</option>
+                </select>
+            </div>
+
+            <button id="generate-btn" class="generate-btn">Generar Código QR</button>
+        </div>
+
+        <div id="preview-section" class="preview-section hidden">
+            <h2>Vista Previa</h2>
+            <div id="qr-preview" class="qr-preview"></div>
+            <button id="download-btn" class="download-btn">Descargar QR</button>
+        </div>
+
+        <div id="error-message" class="error-message hidden"></div>
+    </div>
+
+    <script src="qrcode-generator.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
