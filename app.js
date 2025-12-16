@@ -14,10 +14,21 @@ const fileName = document.querySelector('.file-name');
 // Variables para almacenar datos
 let uploadedLogo = null;
 let currentQRCanvas = null;
+let currentQRData = null;
+
+// Variables para el redimensionamiento con arrastre
+let isDragging = false;
+let startY = 0;
+let startSize = 20;
 
 // Event Listeners
 logoUpload.addEventListener('change', handleLogoUpload);
-logoSizeInput.addEventListener('input', updateSizeLabel);
+logoSizeInput.addEventListener('input', function() {
+    updateSizeLabel();
+    if (currentQRCanvas && uploadedLogo) {
+        redrawQRWithLogo();
+    }
+});
 generateBtn.addEventListener('click', generateQRCode);
 downloadBtn.addEventListener('click', downloadQRCode);
 
@@ -63,6 +74,54 @@ function updateSizeLabel() {
     sizeValue.textContent = logoSizeInput.value + '%';
 }
 
+// Calcula las dimensiones y posición del logo
+function getLogoDimensions(canvasSize) {
+    if (!uploadedLogo) return null;
+
+    const logoSizePercent = parseInt(logoSizeInput.value) / 100;
+    const maxLogoSize = canvasSize * logoSizePercent;
+    const aspectRatio = uploadedLogo.width / uploadedLogo.height;
+
+    let logoWidth, logoHeight;
+    if (aspectRatio > 1) {
+        logoWidth = maxLogoSize;
+        logoHeight = maxLogoSize / aspectRatio;
+    } else {
+        logoHeight = maxLogoSize;
+        logoWidth = maxLogoSize * aspectRatio;
+    }
+
+    const padding = 10;
+    const x = (canvasSize - logoWidth) / 2;
+    const y = (canvasSize - logoHeight) / 2;
+
+    return {
+        x: x - padding,
+        y: y - padding,
+        width: logoWidth + padding * 2,
+        height: logoHeight + padding * 2,
+        logoX: x,
+        logoY: y,
+        logoWidth: logoWidth,
+        logoHeight: logoHeight
+    };
+}
+
+// Verifica si un módulo del QR está dentro del área del logo
+function isModuleInLogoArea(moduleX, moduleY, moduleSize, logoDims) {
+    if (!logoDims) return false;
+
+    const moduleRight = moduleX + moduleSize;
+    const moduleBottom = moduleY + moduleSize;
+    const logoRight = logoDims.x + logoDims.width;
+    const logoBottom = logoDims.y + logoDims.height;
+
+    return !(moduleRight <= logoDims.x ||
+             moduleX >= logoRight ||
+             moduleBottom <= logoDims.y ||
+             moduleY >= logoBottom);
+}
+
 // Genera el código QR
 function generateQRCode() {
     const text = qrTextInput.value.trim();
@@ -101,17 +160,21 @@ function generateQRCode() {
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, actualSize, actualSize);
 
-        // Dibuja el QR
+        // Calcula dimensiones del logo si existe
+        const logoDims = uploadedLogo ? getLogoDimensions(actualSize) : null;
+
+        // Dibuja el QR, omitiendo módulos en el área del logo
         ctx.fillStyle = '#000000';
         for (let row = 0; row < moduleCount; row++) {
             for (let col = 0; col < moduleCount; col++) {
                 if (qr.isDark(row, col)) {
-                    ctx.fillRect(
-                        (col + margin) * actualCellSize,
-                        (row + margin) * actualCellSize,
-                        actualCellSize,
-                        actualCellSize
-                    );
+                    const moduleX = (col + margin) * actualCellSize;
+                    const moduleY = (row + margin) * actualCellSize;
+
+                    // Solo dibuja el módulo si NO está en el área del logo
+                    if (!isModuleInLogoArea(moduleX, moduleY, actualCellSize, logoDims)) {
+                        ctx.fillRect(moduleX, moduleY, actualCellSize, actualCellSize);
+                    }
                 }
             }
         }
@@ -123,9 +186,19 @@ function generateQRCode() {
 
         // Muestra el resultado
         currentQRCanvas = canvas;
+        currentQRData = { qr, qrSize, actualSize, moduleCount, actualCellSize, margin };
         qrPreview.innerHTML = '';
         qrPreview.appendChild(canvas);
         previewSection.classList.remove('hidden');
+
+        // Muestra/oculta el texto de ayuda según haya logo
+        const helpText = document.querySelector('.help-text');
+        if (uploadedLogo) {
+            helpText.style.display = 'block';
+            setupDragToResize(canvas);
+        } else {
+            helpText.style.display = 'none';
+        }
 
     } catch (error) {
         showError('Error al generar el código QR: ' + error.message);
@@ -134,7 +207,7 @@ function generateQRCode() {
 }
 
 // Agrega el logo al centro del QR
-function addLogoToQR(qrCanvas, logoImg) {
+function addLogoToQR(qrCanvas, logoImg, showBorder = true) {
     const ctx = qrCanvas.getContext('2d');
     const qrSize = qrCanvas.width;
 
@@ -174,6 +247,148 @@ function addLogoToQR(qrCanvas, logoImg) {
 
     // Dibuja el logo con su relación de aspecto original
     ctx.drawImage(logoImg, x, y, logoWidth, logoHeight);
+
+    // Dibuja borde interactivo solo para la vista previa
+    if (logoImg && showBorder) {
+        ctx.strokeStyle = 'rgba(102, 126, 234, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.strokeRect(x - padding, y - padding, logoWidth + padding * 2, logoHeight + padding * 2);
+        ctx.setLineDash([]);
+    }
+}
+
+// Configura el redimensionamiento con arrastre del mouse
+function setupDragToResize(canvas) {
+    canvas.addEventListener('mousedown', onMouseDown);
+    canvas.addEventListener('mousemove', onCanvasMouseMove);
+    canvas.addEventListener('mouseup', onMouseUp);
+    canvas.addEventListener('mouseleave', onMouseUp);
+}
+
+function getCanvasCoordinates(e) {
+    const rect = currentQRCanvas.getBoundingClientRect();
+    const scaleX = currentQRCanvas.width / rect.width;
+    const scaleY = currentQRCanvas.height / rect.height;
+
+    return {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top) * scaleY
+    };
+}
+
+function isMouseOverLogo(x, y) {
+    if (!uploadedLogo || !currentQRCanvas) return false;
+
+    const logoSizePercent = parseInt(logoSizeInput.value) / 100;
+    const maxLogoSize = currentQRCanvas.width * logoSizePercent;
+    const aspectRatio = uploadedLogo.width / uploadedLogo.height;
+
+    let logoWidth, logoHeight;
+    if (aspectRatio > 1) {
+        logoWidth = maxLogoSize;
+        logoHeight = maxLogoSize / aspectRatio;
+    } else {
+        logoHeight = maxLogoSize;
+        logoWidth = maxLogoSize * aspectRatio;
+    }
+
+    const padding = 10;
+    const centerX = currentQRCanvas.width / 2;
+    const centerY = currentQRCanvas.height / 2;
+    const logoX = centerX - logoWidth / 2;
+    const logoY = centerY - logoHeight / 2;
+
+    return x >= logoX - padding && x <= logoX + logoWidth + padding &&
+           y >= logoY - padding && y <= logoY + logoHeight + padding;
+}
+
+function onCanvasMouseMove(e) {
+    if (!uploadedLogo || !currentQRCanvas) return;
+
+    const coords = getCanvasCoordinates(e);
+
+    if (isDragging) {
+        const deltaY = startY - e.clientY;
+        const sensitivity = 0.2;
+        let newSize = startSize + (deltaY * sensitivity);
+
+        // Limita el tamaño entre 10 y 30
+        newSize = Math.max(10, Math.min(30, newSize));
+
+        // Actualiza el slider y redibuja
+        logoSizeInput.value = Math.round(newSize);
+        updateSizeLabel();
+        redrawQRWithLogo();
+    } else {
+        // Cambia el cursor cuando está sobre el logo
+        if (isMouseOverLogo(coords.x, coords.y)) {
+            currentQRCanvas.style.cursor = 'grab';
+        } else {
+            currentQRCanvas.style.cursor = 'default';
+        }
+    }
+}
+
+function onMouseDown(e) {
+    if (!uploadedLogo || !currentQRData) return;
+
+    const coords = getCanvasCoordinates(e);
+
+    // Verifica si el clic está sobre el logo
+    if (isMouseOverLogo(coords.x, coords.y)) {
+        isDragging = true;
+        startY = e.clientY;
+        startSize = parseInt(logoSizeInput.value);
+        currentQRCanvas.style.cursor = 'grabbing';
+        e.preventDefault();
+    }
+}
+
+function onMouseUp() {
+    if (isDragging) {
+        isDragging = false;
+        currentQRCanvas.style.cursor = 'grab';
+    }
+}
+
+// Redibuja el QR con el logo en el nuevo tamaño
+function redrawQRWithLogo() {
+    if (!currentQRData || !currentQRCanvas) return;
+
+    const { qr, actualSize, moduleCount, actualCellSize, margin } = currentQRData;
+    const ctx = currentQRCanvas.getContext('2d');
+
+    // Limpia el canvas
+    ctx.clearRect(0, 0, actualSize, actualSize);
+
+    // Fondo blanco
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, actualSize, actualSize);
+
+    // Calcula dimensiones del logo si existe
+    const logoDims = uploadedLogo ? getLogoDimensions(actualSize) : null;
+
+    // Dibuja el QR, omitiendo módulos en el área del logo
+    ctx.fillStyle = '#000000';
+    for (let row = 0; row < moduleCount; row++) {
+        for (let col = 0; col < moduleCount; col++) {
+            if (qr.isDark(row, col)) {
+                const moduleX = (col + margin) * actualCellSize;
+                const moduleY = (row + margin) * actualCellSize;
+
+                // Solo dibuja el módulo si NO está en el área del logo
+                if (!isModuleInLogoArea(moduleX, moduleY, actualCellSize, logoDims)) {
+                    ctx.fillRect(moduleX, moduleY, actualCellSize, actualCellSize);
+                }
+            }
+        }
+    }
+
+    // Dibuja el logo
+    if (uploadedLogo) {
+        addLogoToQR(currentQRCanvas, uploadedLogo);
+    }
 }
 
 // Descarga el código QR generado
@@ -184,6 +399,41 @@ function downloadQRCode() {
     }
 
     try {
+        // Redibuja el QR sin el borde antes de descargar
+        if (uploadedLogo && currentQRData) {
+            const { qr, actualSize, moduleCount, actualCellSize, margin } = currentQRData;
+            const ctx = currentQRCanvas.getContext('2d');
+
+            // Limpia el canvas
+            ctx.clearRect(0, 0, actualSize, actualSize);
+
+            // Fondo blanco
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, actualSize, actualSize);
+
+            // Calcula dimensiones del logo si existe
+            const logoDims = uploadedLogo ? getLogoDimensions(actualSize) : null;
+
+            // Dibuja el QR, omitiendo módulos en el área del logo
+            ctx.fillStyle = '#000000';
+            for (let row = 0; row < moduleCount; row++) {
+                for (let col = 0; col < moduleCount; col++) {
+                    if (qr.isDark(row, col)) {
+                        const moduleX = (col + margin) * actualCellSize;
+                        const moduleY = (row + margin) * actualCellSize;
+
+                        // Solo dibuja el módulo si NO está en el área del logo
+                        if (!isModuleInLogoArea(moduleX, moduleY, actualCellSize, logoDims)) {
+                            ctx.fillRect(moduleX, moduleY, actualCellSize, actualCellSize);
+                        }
+                    }
+                }
+            }
+
+            // Dibuja el logo SIN borde
+            addLogoToQR(currentQRCanvas, uploadedLogo, false);
+        }
+
         // Convierte el canvas a blob y lo descarga
         currentQRCanvas.toBlob(function(blob) {
             const url = URL.createObjectURL(blob);
@@ -192,6 +442,11 @@ function downloadQRCode() {
             link.href = url;
             link.click();
             URL.revokeObjectURL(url);
+
+            // Redibuja con el borde para la vista previa
+            if (uploadedLogo) {
+                redrawQRWithLogo();
+            }
         });
     } catch (error) {
         showError('Error al descargar el código QR: ' + error.message);

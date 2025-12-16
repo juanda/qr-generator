@@ -141,8 +141,15 @@ h1 {
 
 .preview-section h2 {
     color: #333;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     font-size: 1.5em;
+}
+
+.help-text {
+    color: #667eea;
+    font-size: 0.85em;
+    margin-bottom: 15px;
+    font-style: italic;
 }
 
 .qr-preview {
