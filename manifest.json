@@ -1,4 +1,5 @@
 {
+  "id": "/qr-generator/",
   "name": "Generador de Código QR con Logo",
   "short_name": "QR Generator",
   "description": "Crea códigos QR personalizados con tu logo integrado",
@@ -62,6 +63,15 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "qr.png",
+      "sizes": "644x680",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Generador de Código QR con Logo"
     }
   ],
   "categories": ["utilities", "productivity"]
